@@ -16,6 +16,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import RocCurveDisplay
 import seaborn as sns
 from matplotlib import pyplot as plt
 import numpy as np
@@ -52,18 +53,22 @@ def perform_eda(df):
     plt.figure(figsize=(20, 10))
     df['Churn'].hist()
     plt.savefig('./images/churn_histogram.png')
+    plt.close()
 
     plt.figure(figsize=(20, 10))
     df['Customer_Age'].hist()
     plt.savefig('./images/age_histogram.png')
+    plt.close()
 
     plt.figure(figsize=(20, 10))
     df['Marital_Status'].value_counts('normalize').plot(kind='bar')
     plt.savefig('./images/marital_status_plot.png')
+    plt.close()
 
     plt.figure(figsize=(20, 10))
     sns.histplot(df['Total_Trans_Ct'], stat='density', kde=True)
     plt.savefig('./images/transaction_count_histogram.png')
+    plt.close()
 
     plt.figure(figsize=(20, 10))
     sns.heatmap(
@@ -73,6 +78,7 @@ def perform_eda(df):
         cmap='Dark2_r',
         linewidths=2)
     plt.savefig('./images/correlation.png')
+    plt.close()
 
 
 def encoder_helper(df, category_lst, response):
@@ -171,15 +177,15 @@ def classification_report_image(y_train,
     }
 
     for evaluation, data in result_dict.items():
-        plt.rc('figure', figsize=(5, 5))
+        fig = plt.figure(figsize=(5,5))
         plt.text(
             0.01, 1.25, evaluation, {
-                'fontsize': 10}, fontproperties='monospace')
+                'fontsize': 10}, fontproperties='monospace', transform=fig.transFigure)
         plt.text(
             0.01, 0.05, str(
                 classification_report(
                     data[0], data[1])), {
-                'fontsize': 10}, fontproperties='monospace')
+                'fontsize': 10}, fontproperties='monospace', transform=fig.transFigure)
         plt.axis('off')
         plt.savefig('./images/' + evaluation.replace(' ', '_') + '.png')
 
@@ -200,7 +206,7 @@ def feature_importance_plot(model, X_data, output_pth):
 
     names = [X_data.columns[i] for i in indices]
 
-    plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(20, 12))
     plt.title("Feature Importance")
     plt.ylabel('Importance')
 
@@ -240,8 +246,21 @@ def train_models(X_train, X_test, y_train, y_test):
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
     y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
 
+    
+
     y_train_preds_lr = lrc.predict(X_train)
     y_test_preds_lr = lrc.predict(X_test)
+
+    lrc_plot = RocCurveDisplay.from_estimator(lrc, X_test, y_test)
+
+
+    plt.figure(figsize=(15, 8))
+    ax = plt.gca()
+    rfc_disp = RocCurveDisplay.from_estimator(cv_rfc.best_estimator_, X_test, y_test, ax=ax, alpha=0.8)
+    lrc_plot.plot(ax=ax, alpha=0.8)
+
+    plt.savefig("./images/ROC_plot.png")
+
 
     classification_report_image(
         y_train,
