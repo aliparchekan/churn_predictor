@@ -1,0 +1,8 @@
+root - INFO - Testing import_data: SUCCESS
+root - INFO - Successfully opened age_histogram.png
+root - INFO - Successfully opened churn_histogram.png
+root - INFO - Successfully opened correlation.png
+root - INFO - Successfully opened marital_status_plot.png
+root - INFO - Successfully opened transaction_count_histogram.png
+root - INFO - Successfully added all the columns
+root - INFO - Successfully divided data into train and test
