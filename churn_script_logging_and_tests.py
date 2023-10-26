@@ -1,12 +1,22 @@
 import os
 import logging
 import churn_library_solution as cls
+from churn_library import import_data
 
 logging.basicConfig(
     filename='./logs/churn_library.log',
     level = logging.INFO,
     filemode='w',
     format='%(name)s - %(levelname)s - %(message)s')
+
+@pytest.fixture(scope= "module")
+def raw_df():
+	"""
+	Return the raw data frame
+	"""
+	raw_df = import_data('./data/bank_data.csv')
+
+	return raw_df
 
 def test_import(import_data):
 	'''
@@ -31,6 +41,14 @@ def test_eda(perform_eda):
 	'''
 	test perform eda function
 	'''
+	try:
+		perform_eda(raw_df)
+		files = ["age_histogram.png", "churn_histogram.png", "correlation.png", "marital_status_plot.png", "transaction_count_histogram.png"]
+		for file in files:
+			with open(file, 'r'):
+				logging.info("Successfully opened %s", file)
+	except FileNotFoundError:
+		logging.error("ERROR: %s is not created", file)
 
 
 def test_encoder_helper(encoder_helper):
